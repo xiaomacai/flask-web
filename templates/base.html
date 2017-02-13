@@ -17,7 +17,7 @@
             {{ message }}
         {% endfor %}
         <div class="page-header">
-            <h1>Hello, {% if name %}{{ name }}{% else %}Stronger{% endif %}</h1>
+            <h1>{% if known %}Hi{% else %}Hello{% endif %}, {% if name %}{{ name }}{% else %}Stronger{% endif %}</h1>
             {{ wtf.quick_form(form) }}
         </div>
     </div>
