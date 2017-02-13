@@ -1,0 +1,9 @@
+# Flask Web ignore files
+
+# database file
+*.sqlite
+migrations/
+
+# compile file
+*.pyc
+
