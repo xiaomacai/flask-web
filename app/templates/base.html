@@ -8,6 +8,11 @@
 {% block title %}Flask Web{% endblock %}
 
 {% block navbar %}
+    {% if current_user.is_authenticated %}
+        <li><a href="{{ url_for('auth.logou') }}">退出</a></li>
+    {% else %}
+        <li><a href="{{ url_for('auth.login') }}">登陆</a></li>
+    {% endif %}
 
 {% endblock %}
 
