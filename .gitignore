@@ -6,4 +6,6 @@ migrations/
 
 # compile file
 *.pyc
+.idea/
+venv/
 
