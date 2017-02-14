@@ -53,6 +53,32 @@ def confirm(token):
     return redirect(url_for('main.index'))
 
 
+@auth.before_app_request
+def before_request():
+    if current_user.is_authenticated \
+            and not current_user.confirmed \
+            and request.endpoint[:5] != 'auth.' \
+            and request.endpoint != 'static':
+        return redirect(url_for('auth.unconfirmed'))
+
+
+@auth.route('/unconfirmed')
+def unconfirmed():
+    if current_user.is_anonymous or current_user.confirmed:
+        return redirect(url_for('main.index'))
+    return render_template('auth/unconfirmed.html')
+
+
+@auth.route('/confirm')
+@login_required
+def resend_confirmation():
+    token = current_user.generate_confirmation_token()
+    send_mail(current_user.email, u'确认邮箱', 'auth/mail/confirm', user=current_user, token=token)
+    flash(u'新的确认邮件已经发到您的邮箱,请查收')
+    return redirect(url_for('main.index'))
+
+
+
 
 
 

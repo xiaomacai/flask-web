@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}确认邮箱{% endblock %}
+
+{% block content %}
+    <p>
+    你好,current_user.user_name：
+    你还没有确认你的邮箱，请点击下面链接确认您的邮箱: <a href="{{url_for('auth.resend_confirmation', _external=True)}}">点击发送</a>
+    </p>
+{% endblock %}
