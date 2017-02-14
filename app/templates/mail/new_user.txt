@@ -1,1 +1,1 @@
-新用户{{user.userName}}登陆.
+新用户{{user.user_name}}登陆.
