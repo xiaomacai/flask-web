@@ -1,7 +1,7 @@
 # coding:utf8
 from flask import render_template, redirect, request, url_for, flash
 from . import auth
-from .forms import LoginForm, RegistrationForm
+from .forms import LoginForm, RegistrationForm, ChangePasswordForm
 from ..models import User
 from flask_login import login_user, login_required, logout_user, current_user
 from .. import db
@@ -76,6 +76,19 @@ def resend_confirmation():
     send_mail(current_user.email, u'确认邮箱', 'auth/mail/confirm', user=current_user, token=token)
     flash(u'新的确认邮件已经发到您的邮箱,请查收')
     return redirect(url_for('main.index'))
+
+
+@auth.route('/change_password')
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        current_user.password = form.password2.data
+        db.session.add(current_user)
+        return redirect(url_for('main.index'))
+    return render_template('auth/change_password.html', form=form)
+
+
 
 
 
