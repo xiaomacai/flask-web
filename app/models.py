@@ -56,7 +56,35 @@ class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.INT, primary_key=True)
     name = db.Column(db.INTEGER, unique=True)
-    users = db.relationship('User', backref='roles')
+    default = db.Column(db.BOOLEAN, default=False, index=True)
+    permissions = db.Column(db.INTEGER)
+    users = db.relationship('User', backref='roles', lazy='dynamic')
 
     def __repr__(self):
         return '<Role {}>'.format(self.name)
+
+    @staticmethod
+    def insert_roles():
+        roles = {
+            'User': (Permission.FOLLOW | Permission.COMMIT | Permission.WRITE_ARTICLES, True),
+            'Moderator': (Permission.FOLLOW | Permission.COMMIT | Permission.WRITE_ARTICLES |
+                          Permission.MODERATE_COMMENTS, False),
+            'Administrator': (0xff, False)
+        }
+        for r in roles:
+            role = Role.query.filter_by(name=r).first()
+            if role is None:
+                role = Role(name=r)
+            role.default = roles[r][1]
+            role.permissions = roles[r][0]
+            db.session.add(role)
+        db.session.commit()
+
+
+
+class Permission:
+    FOLLOW = 0X01
+    COMMIT = 0X02
+    WRITE_ARTICLES = 0X04
+    MODERATE_COMMENTS = 0X08
+    ADMINISTRATOR = 0X80
