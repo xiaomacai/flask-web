@@ -5,6 +5,7 @@ from flask_login import UserMixin, AnonymousUserMixin
 from . import login_manager
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
+from datetime import datetime
 
 
 class User(db.Model, UserMixin):
@@ -12,6 +13,11 @@ class User(db.Model, UserMixin):
     id = db.Column(db.INTEGER, primary_key=True)
     email = db.Column(db.String(64), unique=True, index=True)
     user_name = db.Column(db.String(64), unique=True, index=True)
+    name = db.Column(db.String(64))
+    location = db.Column(db.String(64))
+    about_me = db.Column(db.TEXT)
+    member_since = db.Column(db.DATETIME(), default=datetime.utcnow)
+    last_seen = db.Column(db.DATETIME(), default=datetime.utcnow)
     role_id = db.Column(db.INTEGER, db.ForeignKey('roles.id'))
     password_hash = db.Column(db.String(128))
     confirmed = db.Column(db.BOOLEAN, default=False)
@@ -20,9 +26,13 @@ class User(db.Model, UserMixin):
         super(User, self).__init__(**kwargs)
         if self.role is None:
             if self.email == current_app.config['BLOG_ADMIN']:
-                self.role = User.query.filter_by(permissions=0xff).first()
-            else:
-                self.role = User.query.filter_by(default=True).first()
+                self.role = Role.query.filter_by(permissions=0xff).first()
+            if self.role is None:
+                self.role = Role.query.filter_by(default=True).first()
+
+    def ping(self):
+        self.last_seen = datetime.utcnow()
+        db.session.add(self)
 
     def can(self, permissions):
         return self.role is not None and (self.role.permissions & permissions) == permissions
@@ -82,7 +92,7 @@ class Role(db.Model):
     name = db.Column(db.INTEGER, unique=True)
     default = db.Column(db.BOOLEAN, default=False, index=True)
     permissions = db.Column(db.INTEGER)
-    users = db.relationship('User', backref='roles', lazy='dynamic')
+    users = db.relationship('User', backref='role', lazy='dynamic')
 
     def __repr__(self):
         return '<Role {}>'.format(self.name)

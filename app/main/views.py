@@ -1,4 +1,4 @@
-from flask import render_template, session, redirect, url_for, current_app
+from flask import render_template, session, redirect, url_for, current_app, abort
 
 from . import main
 from .forms import NameForm
@@ -24,3 +24,12 @@ def index():
         return redirect(url_for('main.index'))
     return render_template('index.html', known=session.get('known'), name=session.get('name'),
                            form=form)
+
+
+@main.route('/user/<user_name>')
+def user(user_name):
+    user = User.query.filter_by(user_name=user_name).first()
+    if user is None:
+        abort(404)
+    return render_template('user.html', user=user)
+

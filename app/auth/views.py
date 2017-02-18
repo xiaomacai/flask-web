@@ -1,5 +1,5 @@
 # coding:utf8
-from flask import render_template, redirect, request, url_for, flash
+from flask import render_template, redirect, request, url_for, flash, abort
 from . import auth
 from .forms import LoginForm, RegistrationForm, ChangePasswordForm
 from ..models import User
@@ -55,11 +55,12 @@ def confirm(token):
 
 @auth.before_app_request
 def before_request():
-    if current_user.is_authenticated \
-            and not current_user.confirmed \
+    if current_user.is_authenticated:
+        current_user.ping()
+        if not current_user.confirmed \
             and request.endpoint[:5] != 'auth.' \
             and request.endpoint != 'static':
-        return redirect(url_for('auth.unconfirmed'))
+            return redirect(url_for('auth.unconfirmed'))
 
 
 @auth.route('/unconfirmed')
@@ -87,7 +88,6 @@ def change_password():
         db.session.add(current_user)
         return redirect(url_for('main.index'))
     return render_template('auth/change_password.html', form=form)
-
 
 
 
