@@ -1,7 +1,7 @@
 # coding:utf8
 from . import db
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin
+from flask_login import UserMixin, AnonymousUserMixin
 from . import login_manager
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
@@ -15,6 +15,20 @@ class User(db.Model, UserMixin):
     role_id = db.Column(db.INTEGER, db.ForeignKey('roles.id'))
     password_hash = db.Column(db.String(128))
     confirmed = db.Column(db.BOOLEAN, default=False)
+
+    def __init__(self, **kwargs):
+        super(User, self).__init__(**kwargs)
+        if self.role is None:
+            if self.email == current_app.config['BLOG_ADMIN']:
+                self.role = User.query.filter_by(permissions=0xff).first()
+            else:
+                self.role = User.query.filter_by(default=True).first()
+
+    def can(self, permissions):
+        return self.role is not None and (self.role.permissions & permissions) == permissions
+
+    def is_administrator(self):
+        return self.can(Permission.ADMINISTRATOR)
 
     def generate_confirmation_token(self, expiration=3600):
         s = Serializer(current_app.config['SECRET_KEY'], expires_in=expiration)
@@ -45,6 +59,16 @@ class User(db.Model, UserMixin):
 
     def __repr__(self):
         return '<User {}>'.format(self.user_name)
+
+
+class AnonymousUser(AnonymousUserMixin):
+    def can(self, permissions):
+        return False
+
+    def is_administrator(self):
+        return False
+
+login_manager.anonymous_user = AnonymousUser
 
 
 @login_manager.user_loader
@@ -79,7 +103,6 @@ class Role(db.Model):
             role.permissions = roles[r][0]
             db.session.add(role)
         db.session.commit()
-
 
 
 class Permission:
