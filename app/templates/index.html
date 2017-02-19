@@ -1,2 +1,18 @@
 {% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
 
+{% block title %}首页{% endblock %}
+
+{% block page_content %}
+    {% if current_user.user_name %}
+        <p>
+        <h2>Hello, {{ current_user.user_name }}</h2>
+        </p>
+    {% endif %}
+    <div>
+        {% if current_user.can(Permission.WRITE_ARTICLES) %}
+            {{ wtf.quick_form(form) }}
+        {% endif %}
+    </div>
+    {% include "_post.html" %}
+{% endblock %}

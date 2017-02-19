@@ -22,6 +22,8 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(128))
     confirmed = db.Column(db.BOOLEAN, default=False)
 
+    posts = db.relationship('Post', backref='author', lazy='dynamic')
+
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         if self.role is None:
@@ -121,3 +123,11 @@ class Permission:
     WRITE_ARTICLES = 0X04
     MODERATE_COMMENTS = 0X08
     ADMINISTRATOR = 0X80
+
+
+class Post(db.Model):
+    __tablename__ = 'posts'
+    id = db.Column(db.INTEGER, primary_key=True)
+    body = db.Column(db.TEXT)
+    timestamp = db.Column(db.DATETIME, index=True, default=datetime.utcnow)
+    author_id = db.Column(db.INTEGER, db.ForeignKey('users.id'))

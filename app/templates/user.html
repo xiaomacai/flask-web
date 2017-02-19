@@ -15,8 +15,8 @@
     {% endif %}
     {% if user.about_me %} <p>{{ user.about_me }}</p>{% endif %}
     <p>
-        注册时间: {{ user.member_since }}.
-        上次登陆时间: {{ user.last_seen }}
+        注册时间: {{ moment(user.member_since).fromNow() }}.
+        上次登陆时间: {{ moment(user.last_seen).fromNow() }}
     </p>
     {% if user == current_user %}
         <a href="{{ url_for('main.edit_profile') }}" class="btn btn-default">编辑</a>
@@ -29,4 +29,6 @@
     <p>
         <a href="{{ url_for('auth.change_password') }}">修改密码</a>
     </p>
+    <h3>{{ user.user_name }}发表的博客</h3>
+    {% include "_post.html" %}
 {% endblock %}
