@@ -18,4 +18,7 @@
         注册时间: {{ user.member_since }}.
         上次登陆时间: {{ user.last_seen }}
     </p>
+    {% if user == current_user %}
+        <a href="{{ url_for('main.edit_profile') }}" class="btn btn-default">编辑</a>
+    {% endif %}
 {% endblock %}
