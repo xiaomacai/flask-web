@@ -6,6 +6,8 @@ from . import login_manager
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
 from datetime import datetime
+import bleach
+from markdown import markdown
 
 
 class User(db.Model, UserMixin):
@@ -129,5 +131,15 @@ class Post(db.Model):
     __tablename__ = 'posts'
     id = db.Column(db.INTEGER, primary_key=True)
     body = db.Column(db.TEXT)
+    body_html = db.Column(db.TEXT)
     timestamp = db.Column(db.DATETIME, index=True, default=datetime.utcnow)
     author_id = db.Column(db.INTEGER, db.ForeignKey('users.id'))
+
+    @staticmethod
+    def on_changed_body(target, value, oldvalue, initator):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i'\
+                        'li', 'ol', 'pre', 'strong', 'ul', 'h1', 'h2', 'h3', 'p']
+        target.body_html = bleach.linkify(bleach.clean(markdown(value, output_format='html'),
+                                                       tags=allowed_tags, strip=True))
+
+db.event.listen(Post.body, 'set', Post.on_changed_body)
