@@ -19,6 +19,18 @@
                     {{ post.body }}
                 {% endif %}
             </div>
+            <div class="post-content">
+                <a href="{{ url_for('.post', id=post.id) }}">
+                    <span class="label label-default">转到</span>
+                </a>
+            </div>
+            <div class="post-footer">
+                {% if current_user == post.author %}
+                    <a href="{{ url_for('.edit', id=post.id) }}">
+                        <span class="label label-primary">编辑</span>
+                    </a>
+                {% endif %}
+            </div>
         </li>
     {% endfor %}
 </ul>
