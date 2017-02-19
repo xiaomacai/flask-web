@@ -21,4 +21,12 @@
     {% if user == current_user %}
         <a href="{{ url_for('main.edit_profile') }}" class="btn btn-default">编辑</a>
     {% endif %}
+    {% if current_user.is_administrator %}
+        <a href="{{ url_for('main.edit_profile_admin', id=user.id) }}" class="btn btn-danger">管理员编辑</a>
+    {% endif %}
+
+    <hr>
+    <p>
+        <a href="{{ url_for('auth.change_password') }}">修改密码</a>
+    </p>
 {% endblock %}

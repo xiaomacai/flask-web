@@ -1,11 +1,13 @@
 from flask import render_template, session, redirect, url_for, current_app, abort
 
 from . import main
-from .forms import NameForm, EditProfileForm
+from .forms import NameForm, EditProfileForm, EditProfileAdminForm
 from .. import db
-from ..models import User
+from ..models import User, Role
 
 from flask_login import login_required, current_user
+
+from ..decorators import admin_required
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -51,4 +53,27 @@ def edit_profile():
     form.about_me.data = current_user.about_me
     return render_template('edit_profile.html', form=form)
 
+
+@main.route('/edit_profile/<int:id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_profile_admin(id):
+    user = User.query.get_or_404(id)
+    form = EditProfileAdminForm(user=user)
+    if form.validate_on_submit():
+        user.email = form.email.data
+        user.location = form.location.data
+        user.about_me = form.about_me.data
+        user.role = Role.query.get(form.role.data)
+        user.name = form.name.data
+        user.user_name = form.user_name.data
+        return redirect(url_for('main.user', user_name=user.user_name))
+    form.email.data = user.email
+    form.about_me.data = user.about_me
+    form.confirmed.data = user.confirmed
+    form.location.data = user.location
+    form.name.data = user.name
+    form.role.data = user.role_id
+
+    return render_template('edit_profile.html', form=form, user=user)
 
