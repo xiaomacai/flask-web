@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}个人主页{% endblock %}
+{% import "_macros.html" as macros %}
 
 {% block page_content %}
     {{ super() }}
@@ -31,4 +32,9 @@
     </p>
     <h3>{{ user.user_name }}发表的博客</h3>
     {% include "_post.html" %}
+    {% if pagination %}
+        <div class="pagination">
+        {{ macros.pagination_widget(pagination, '.user', user_name=user.user_name) }}
+        </div>
+    {% endif %}
 {% endblock %}

@@ -14,6 +14,7 @@ class Config:
     MAIL_SUBJECT_PREFIX = u'博客'
     BLOG_ADMIN = os.getenv('BLOG_ADMIN')
     MAIL_SERVER = u'博客管理员<{}>'.format(BLOG_ADMIN)
+    BLOG_POSTS_PER_PAGE = 10
 
     @staticmethod
     def init_app(app):
