@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% import "_macros.html" as macros %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block page_content %}
+    <h2>Hello, {{ user.user_name }},你的关注者如下:</h2>
+    <hr>
+    <p>
+        {% for follow in followed %}
+            用户名：
+            <a href="{{ url_for('main.user', user_name=follow.user.user_name) }}">
+                <span>{{ follow.user.user_name }}</span>
+            </a>
+            关注时间:{{ moment(follow.timestamp).fromNow() }}
+            <br>
+        {% endfor %}
+    </p>
+
+    {% if pagination %}
+        <div class="pagination">
+            {{ macros.pagination_widget(pagination, '.followed_by', user_name=user.user_name) }}
+        </div>
+    {% endif %}
+{% endblock %}
+

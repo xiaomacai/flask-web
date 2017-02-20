@@ -10,6 +10,15 @@ import bleach
 from markdown import markdown
 
 
+class Follow(db.Model):
+    __tablename__ = 'follows'
+    follower_id = db.Column(db.INTEGER, db.ForeignKey('users.id'),
+                            primary_key=True)
+    followed_id = db.Column(db.INTEGER, db.ForeignKey('users.id'),
+                            primary_key=True)
+    timestamp = db.Column(db.DATETIME, default=datetime.utcnow)
+
+
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.INTEGER, primary_key=True)
@@ -26,6 +35,15 @@ class User(db.Model, UserMixin):
 
     posts = db.relationship('Post', backref='author', lazy='dynamic')
 
+    followed = db.relationship('Follow', foreign_keys=[Follow.follower_id],
+                                  backref=db.backref('follower', lazy='joined'),
+                                  lazy='dynamic',
+                                  cascade='all, delete-orphan')
+    followers = db.relationship('Follow', foreign_keys=[Follow.followed_id],
+                                backref=db.backref('followed', lazy='joined'),
+                                lazy='dynamic',
+                                cascade='all, delete-orphan')
+
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         if self.role is None:
@@ -33,6 +51,22 @@ class User(db.Model, UserMixin):
                 self.role = Role.query.filter_by(permissions=0xff).first()
             if self.role is None:
                 self.role = Role.query.filter_by(default=True).first()
+
+    def follow(self, user):
+        if not self.is_following(user):
+            f = Follow(follower=self, followed=user)
+            db.session.add(f)
+
+    def unfollow(self, user):
+        f = self.followed.filter_by(followed_id=user.id).first()
+        if f:
+            db.session.delete(f)
+
+    def is_following(self, user):
+        return self.followed.filter_by(followed_id=user.id).first() is not None
+
+    def is_followed_by(self, user):
+        return self.followers.filter_by(follower_id=user.id).first() is not None
 
     def ping(self):
         self.last_seen = datetime.utcnow()
@@ -143,3 +177,5 @@ class Post(db.Model):
                                                        tags=allowed_tags, strip=True))
 
 db.event.listen(Post.body, 'set', Post.on_changed_body)
+
+

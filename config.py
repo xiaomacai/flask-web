@@ -15,6 +15,8 @@ class Config:
     BLOG_ADMIN = os.getenv('BLOG_ADMIN')
     MAIL_SERVER = u'博客管理员<{}>'.format(BLOG_ADMIN)
     BLOG_POSTS_PER_PAGE = 10
+    BLOG_FOLLOWED_PER_PAGE = 10
+    BLOG_FOLLOWERS_PER_PAGE = 10
 
     @staticmethod
     def init_app(app):

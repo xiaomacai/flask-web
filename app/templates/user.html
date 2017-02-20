@@ -7,8 +7,9 @@
     <h1>{{ user.user_name }}</h1>
     {% if user.name or user.location %}
         <p>
-        {% if user.name %}{{ user.name }}{% endif %}
-        {% if user.location %}来自: <a href="https://maps.google.com/?q={{ user.location }}">{{ user.location }}</a> {% endif %}
+            {% if user.name %}{{ user.name }}{% endif %}
+            {% if user.location %}来自:
+                <a href="https://maps.google.com/?q={{ user.location }}">{{ user.location }}</a> {% endif %}
         </p>
     {% endif %}
     {% if current_user.is_administrator() %}
@@ -19,6 +20,27 @@
         注册时间: {{ moment(user.member_since).fromNow() }}.
         上次登陆时间: {{ moment(user.last_seen).fromNow() }}
     </p>
+
+    {% if current_user.can(Permission.FOLLOW) and user != current_user %}
+        {% if not current_user.is_following(user) %}
+            <a href="{{ url_for('.follow', user_name=user.user_name) }}"
+               class="btn btn-primary">关注</a>
+        {% else %}
+            <a href="{{ url_for('.unfollow', user_name=user.user_name) }}"
+               class="btn btn-primary">取消关注</a>
+        {% endif %}
+    {% endif %}
+    <a href="{{ url_for('.followers', user_name=user.user_name) }}">关注了:<span class="badge">
+        {{ user.followers.count() }}
+    </span></a>
+    <a href="{{ url_for('.followed_by', user_name=user.user_name) }}">关注者: <span class="badge">
+        {{ user.followed.count() }}
+    </span></a>
+    {% if current_user.is_authenticated and user != current_user and
+            user.is_following(current_user) %}
+        <span class="label-default label">关注了你</span>
+    {% endif %}
+    <hr>
     {% if user == current_user %}
         <a href="{{ url_for('main.edit_profile') }}" class="btn btn-default">编辑</a>
     {% endif %}
@@ -26,15 +48,13 @@
         <a href="{{ url_for('main.edit_profile_admin', id=user.id) }}" class="btn btn-danger">管理员编辑</a>
     {% endif %}
 
-    <hr>
-    <p>
-        <a href="{{ url_for('auth.change_password') }}">修改密码</a>
-    </p>
+    <a href="{{ url_for('auth.change_password') }}" class="btn btn-default">修改密码</a>
+
     <h3>{{ user.user_name }}发表的博客</h3>
     {% include "_post.html" %}
     {% if pagination %}
         <div class="pagination">
-        {{ macros.pagination_widget(pagination, '.user', user_name=user.user_name) }}
+            {{ macros.pagination_widget(pagination, '.user', user_name=user.user_name) }}
         </div>
     {% endif %}
 {% endblock %}
