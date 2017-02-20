@@ -48,3 +48,8 @@ class EditProfileAdminForm(FlaskForm):
 class PostForm(FlaskForm):
     body = PageDownField(u'发表博客', validators=[DataRequired()])
     submit = SubmitField(u'确定')
+
+
+class CommentForm(FlaskForm):
+    body = StringField('', validators=[DataRequired()])
+    submit = SubmitField(u'评论')
