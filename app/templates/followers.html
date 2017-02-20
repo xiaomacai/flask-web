@@ -8,12 +8,14 @@
     <hr>
     <p>
         {% for follow in follows %}
-            用户名：
-            <a href="{{ url_for('main.user', user_name=follow.user.user_name) }}">
-                <span>{{ follow.user.user_name }}</span>
-            </a>
-            关注时间:{{ moment(follow.timestamp).fromNow() }}
-            <br>
+            {% if follow.user.user_name != user.user_name %}
+                用户名：
+                <a href="{{ url_for('main.user', user_name=follow.user.user_name) }}">
+                    <span>{{ follow.user.user_name }}</span>
+                </a>
+                关注时间:{{ moment(follow.timestamp).fromNow() }}
+                <br>
+            {% endif %}
         {% endfor %}
     </p>
 

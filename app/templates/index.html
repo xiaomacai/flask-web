@@ -15,7 +15,12 @@
             {{ wtf.quick_form(form) }}
         {% endif %}
     </div>
+    <hr>
+    <a href="{{ url_for('.show_all') }}" class="label-primary label">全部用户</a>
+    <a href="{{ url_for('.show_followed') }}" class="col-md-1">关注用户</a>
+    <hr>
     {% include "_post.html" %}
+
     {% if pagination %}
         <div class="pagination">
         {{ macros.pagination_widget(pagination, '.index') }}
